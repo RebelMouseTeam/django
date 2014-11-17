@@ -107,6 +107,7 @@ class DispatcherTests(unittest.TestCase):
         del a
         del result
         garbage_collect()
+        a_signal._clear_dead_receivers()
         self._testIsClean(a_signal)
 
     def testUidRegistration(self):
