@@ -1,10 +1,10 @@
 import gc
 import sys
 import time
+import unittest
 import weakref
 
 from django.dispatch import Signal, receiver
-from django.utils import unittest
 
 
 if sys.platform.startswith('java'):
@@ -44,10 +44,8 @@ class DispatcherTests(unittest.TestCase):
 
     def _testIsClean(self, signal):
         """Assert that everything has been cleaned up automatically"""
+        self.assertFalse(signal.has_listeners())
         self.assertEqual(signal.receivers, [])
-
-        # force cleanup just in case
-        signal.receivers = []
 
     def testExact(self):
         a_signal.connect(receiver_1_arg, sender=self)
@@ -107,7 +105,6 @@ class DispatcherTests(unittest.TestCase):
         del a
         del result
         garbage_collect()
-        a_signal._clear_dead_receivers()
         self._testIsClean(a_signal)
 
     def testUidRegistration(self):
