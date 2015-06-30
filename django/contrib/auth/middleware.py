@@ -22,10 +22,12 @@ class AuthenticationMiddleware(object):
         request.is_unsecure_authenticated = bool(logged_in_cookie)
 
     def process_response(self, request, response):
-        if request.user.is_authenticated() and not self.has_logged_in_cookie:
+        has_logged_in_cookie = bool(hasattr(self, 'has_logged_in_cookie') and self.has_logged_in_cookie)
+
+        if hasattr(request, 'user') and request.user.is_authenticated() and not has_logged_in_cookie:
             response.set_cookie('is_logged_in', 1, max_age=request.session.get_expiry_age())
 
-        if not (hasattr(request, 'user') and request.user.is_authenticated()) and self.has_logged_in_cookie:
+        if not (hasattr(request, 'user') and request.user.is_authenticated()) and has_logged_in_cookie:
             response.delete_cookie('is_logged_in')
         return response
 
