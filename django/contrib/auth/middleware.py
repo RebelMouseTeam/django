@@ -24,6 +24,9 @@ class AuthenticationMiddleware(object):
     def process_response(self, request, response):
         if request.user.is_authenticated() and not self.has_logged_in_cookie:
             response.set_cookie('is_logged_in', 1, max_age=request.session.get_expiry_age())
+
+        if not request.user.is_authenticated() and self.has_logged_in_cookie:
+            response.delete_cookie('is_logged_in')
         return response
 
 
