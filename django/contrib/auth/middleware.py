@@ -16,6 +16,15 @@ class AuthenticationMiddleware(object):
         assert hasattr(request, 'session'), "The Django authentication middleware requires session middleware to be installed. Edit your MIDDLEWARE_CLASSES setting to insert 'django.contrib.sessions.middleware.SessionMiddleware'."
 
         request.user = SimpleLazyObject(lambda: get_user(request))
+        logged_in_cookie = request.COOKIES.get('is_logged_in')
+        self.has_logged_in_cookie = logged_in_cookie is not None
+
+        request.is_unsecure_authenticated = bool(logged_in_cookie)
+
+    def process_response(self, request, response):
+        if request.user.is_authenticated() and not self.has_logged_in_cookie:
+            response.set_cookie('is_logged_in', 1, max_age=request.session.get_expiry_age())
+        return response
 
 
 class RemoteUserMiddleware(object):
